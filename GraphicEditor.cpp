@@ -8,21 +8,136 @@ struct pixel { //Пиксели, импользующиеся по отдель�
 	int Y;
 	char C;
 };
-char pixels[M_max][N_max]; //Сам "экран"
-int M, N;
-//-----------------Объявление функций---------------------//
-void I_CleanScr(char* pixA, int M, int N);
-void S_Save(char* pixA, int M, int N);
-void L_SetOixel(char* pixA, int M, int N);
-void H_HorizontalLine(char* pixA, int M, int N);
-void V_VerticalLine(char* pixA, int M, int N);
-void K_FillRectangle(char* pixA, int M, int N);
-void F_FillArea(char* pixA, int M, int N);
-//--------------------------------------------------------//
+class Screen {
+private:
+	char pixels[M_max][N_max];
+	int M;
+	int N;
+public:
+	Screen() : M(M_max), N(N_max) //Конструктор
+	{C_CleanScr(M_max, N_max);}
+	//--------------------------------------//
+	void C_CleanScr(int M, int N) {//Очистка заданной области 
+		for (int i = 0; i < M; i++) {
+			for (int j = 0; j < N; j++) {
+				*(*pixels + i * M + j) = 'O';
+			}
+		}
+	}
+	//--------------------------------------//
+	void C_CleanScr() {           //Очистка текущего экрана
+		for (int i = 0; i < M; i++) {
+			for (int j = 0; j < N; j++) {
+				*(*pixels + i * M + j) = 'O';
+			}
+		}
+	}
+	//--------------------------------------//
+	void I_CreateScr() { //Создание нового экрана
+		cin >> M >> N;
+		C_CleanScr();
+	}
+	//--------------------------------------//
+	void S_Save() {
+		char letter = ' ';
+		char name[12] = { ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ' };
+		int i = 0;
+		cin >> noskipws;
+		cin >> letter;
+		while (letter != '\n') {
+			name[i] = letter;
+			cin >> letter;
+			i++;
+		}
+		i = 0;
+		do {
+			if (name[i] != ' ') cout << name[i];
+			i++;
+		} while (i < 12);
+		cout << "\n";
+		for (int j = 0; j < N; j++) {
+			for (i = 0; i < M; i++) {
+				cout << *(*pixels + i * M + j);
+			}
+			cout << "\n";
+		}
+		cin >> skipws;
+	}
+	//--------------------------------------//
+	void L_SetOixel() {
+		char C;
+		int X, Y;
+		cin >> X >> Y >> C;
+		*(*pixels + (X - 1) * M + (Y - 1)) = C;
+	}
+	//--------------------------------------//
+	void H_HorizontalLine() {
+		int X1, X2, Y;
+		char C;
+		cin >> X1 >> X2 >> Y >> C;
+		for (int i = X1 - 1; i < X2; i++) {
+			*(*pixels + i * M + Y - 1) = C;
+		}
+	}
+	//--------------------------------------//
+	void V_VerticalLine() {
+		int X, Y1, Y2;
+		char C;
+		cin >> X >> Y1 >> Y2 >> C;
+		for (int i = Y1 - 1; i < Y2; i++) {
+			*(*pixels + (X - 1) * M + i) = C;
+		}
+	}
+	//--------------------------------------//
+	void K_FillRectangle() {
+		int X1, X2, Y1, Y2;
+		char C;
+		cin >> X1 >> X2 >> Y1 >> Y2 >> C;
+		for (int i = X1 - 1; i < X2; i++) {
+			for (int j = Y1 - 1; j < Y2; j++) {
+				*(*pixels + i * M + j) = C;
+			}
+		}
+	}
+	//--------------------------------------//
+	void F_FillArea() {
+		int X, Y;
+		char C, preColor;
+		vector<pixel> steck; //Вспомогательный стек
+		pixel currentPixel;
+		int condition;
+		cin >> X >> Y >> C;
+		preColor = *(*pixels + (X - 1) * M + (Y - 1));
+		steck.push_back({ X - 1, Y - 1, preColor });
+		*(*pixels + (X - 1) * M + (Y - 1)) = C;
+		do {
+			currentPixel = steck.back();
+			steck.pop_back();
+			for (int i = -1; i < 2; i += 2) {
+				X = currentPixel.X + i; Y = currentPixel.Y;
+				condition = (X >= 0 && X < M_max && Y >= 0 && Y < N_max && *(*pixels + X * M + Y) == preColor);
+				if (condition) {
+					steck.push_back({ X, Y, preColor });
+					*(*pixels + X * M + Y) = C;
+				}
+				X = currentPixel.X; Y = currentPixel.Y + i;
+				condition = (X >= 0 && X < M_max && Y >= 0 && Y < N_max && *(*pixels + X * M + Y) == preColor);
+				if (condition) {
+					steck.push_back({ X, Y, preColor });
+					*(*pixels + X * M + Y) = C;
+				}
+			}
+		} while (!steck.empty());
+	}
+	//--------------------------------------//
+	~Screen() { }
+};
+//***********************************************//
 int main()
 {
-	char cCurrentKey;
-	enum Session {
+	Screen* MainScreen = new Screen(); // Объект класса Screen - Экран - создаётся в куче,
+	char cCurrentKey;                  // т.к. в стеке для этого может не хватить памяти
+	enum Session {                     // (выскакиваает предупреждение об этом).
 		OFF,
 		RUN
 	};
@@ -31,126 +146,33 @@ int main()
 		cin >> cCurrentKey;
 		switch (cCurrentKey) {
 		case 'I':
-			cin >> M >> N;
-			I_CleanScr(*pixels, M, N);
+			(*MainScreen).I_CreateScr();
 			break;
 		case 'C':
-			I_CleanScr(*pixels, M, N);
+			(*MainScreen).C_CleanScr();
 			break;
 		case 'L':
-			L_SetOixel(*pixels, M, N);
+			(*MainScreen).L_SetOixel();
 			break;
 		case 'V':
-			V_VerticalLine(*pixels, M, N);
+			(*MainScreen).V_VerticalLine();
 			break;
 		case 'H':
-			H_HorizontalLine(*pixels, M, N);
+			(*MainScreen).H_HorizontalLine();
 			break;
 		case 'K':
-			K_FillRectangle(*pixels, M, N);
+			(*MainScreen).K_FillRectangle();
 			break;
 		case 'F':
-			F_FillArea(*pixels, M, N);
+			(*MainScreen).F_FillArea();
 			break;
 		case 'S':
-			S_Save(*pixels, M, N);
+			(*MainScreen).S_Save();
 			break;
 		case 'X':
+			(*MainScreen).~Screen();
 			currentSession = OFF;
 			break;
 		}
 	}
-}
-void I_CleanScr(char* pixA, int M, int N) { //Очистка экрана
-	for (int i = 0; i < M; i++) {
-		for (int j = 0; j < N; j++) {
-			*(pixA + i * M + j) = 'O';
-		}
-	}
-}
-void S_Save(char* pixels,int M,int N) { //Вывод текущего экрана
-	char letter = ' ';
-	char name[12] = {' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '};
-	int i = 0;
-	cin >> noskipws;
-	cin >> letter;
-	while (letter != '\n') {
-		name[i] = letter;
-		cin >> letter;
-		i++;
-	}
-	i = 0;
-	do {
-		if(name[i] != ' ') cout << name[i];
-		i++;
-	} while (i < 12);
-	cout << "\n";
-	for (int j = 0; j < N; j++) {
-		for (i = 0; i < M; i++) {
-			cout << *(pixels + i*M + j);
-		}
-		cout << "\n";
-	}
-	cin >> skipws;
-}
-void L_SetOixel(char* pixA, int M, int N) { //Установка цвета отдельного пикселя
-	char C;
-	int X, Y;
-	cin >> X >> Y >> C;
-	*(pixA + (X - 1) * M + (Y - 1)) = C;
-}
-void H_HorizontalLine(char* pixA, int M, int N) { //Горизонтальная линия
-	int X1, X2, Y;
-	char C;
-	cin >> X1 >> X2 >> Y >> C;
-	for (int i = X1 - 1; i < X2; i++) {
-		*(pixA + i * M + Y - 1) = C;
-	}
-}
-void V_VerticalLine(char* pixA, int M, int N) {//Вертикальная линия
-	int X, Y1, Y2;
-	char C;
-	cin >> X >> Y1 >> Y2 >> C;
-	for (int i = Y1 - 1; i < Y2; i++) {
-		*(pixA + (X - 1) * M + i) = C;
-	}
-}
-void K_FillRectangle(char* pixA, int M, int N) {//Закраска прямоугольника
-	int X1, X2, Y1, Y2;
-	char C;
-	cin >> X1 >> X2 >> Y1 >> Y2 >> C;
-	for (int i = X1 - 1; i < X2; i++) {
-		for (int j = Y1 - 1; j < Y2; j++) {
-			*(pixA + i * M + j) = C;
-		}
-	}
-}
-void F_FillArea(char* pixA, int M, int N) {//Заливка области
-	int X, Y;
-	char C, preColor;
-	vector<pixel> steck; //Вспомогательный стек
-	pixel currentPixel;
-	int condition;
-	cin >> X >> Y >> C;
-	preColor = *(pixA + (X - 1) * M + (Y - 1));
-	steck.push_back({ X - 1, Y - 1, preColor });
-	*(pixA + (X - 1) * M + (Y - 1)) = C;
-	do {
-		currentPixel = steck.back();
-		steck.pop_back();
-		for (int i = -1; i < 2; i += 2) {
-			X = currentPixel.X + i; Y = currentPixel.Y;
-			condition = (X >= 0 && X < M_max && Y >= 0 && Y < N_max && *(pixA + X * M + Y) == preColor);
-			if (condition) {
-				steck.push_back({ X, Y, preColor });
-				*(pixA + X * M + Y) = C;
-			}
-			X = currentPixel.X; Y = currentPixel.Y + i;
-			condition = (X >= 0 && X < M_max && Y >= 0 && Y < N_max && *(pixA + X * M + Y) == preColor);
-			if (condition) {
-				steck.push_back({ X, Y, preColor });
-				*(pixA + X * M + Y) = C;
-			}
-		}
-	} while (!steck.empty());
 }
