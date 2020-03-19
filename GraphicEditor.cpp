@@ -1,4 +1,5 @@
 ﻿#include <iostream>
+#include <vector>
 #define M_max 250
 #define N_max 250
 using namespace std;
@@ -7,15 +8,9 @@ struct pixel {
 	int Y;
 	char C;
 };
-struct steck {
-	pixel pixelsToColor[M_max * N_max];
-	int i = -1;
-};
 char pixels[M_max][N_max];
 int M, N;
 ///////////////////////////////////////////////////////////
-void PushPixel(steck&, pixel);
-pixel PopPixel(steck&);
 void I_CleanScr(char* pixA, int M, int N);
 void S_Save(char* pixA, int M, int N);
 void L_SetOixel(char* pixA, int M, int N);
@@ -129,41 +124,32 @@ void K_FillRectangle(char* pixA, int M, int N) {
 		}
 	}
 }
-void PushPixel(steck& Steck, pixel InPixel) {
-	Steck.i++;
-	Steck.pixelsToColor[Steck.i] = InPixel;
-}
-pixel PopPixel(steck& Steck) {
-	if (Steck.i > -1) {
-		Steck.i--;
-		return Steck.pixelsToColor[Steck.i + 1];
-	}
-}
 void F_FillArea(char* pixA, int M, int N) {
 	int X, Y;
 	char C, preColor;
-	steck Steck;
+	vector<pixel> steck;
 	pixel currentPixel;
 	int condition;
 	cin >> X >> Y >> C;
 	preColor = *(pixA + (X - 1) * M + (Y - 1));
-	PushPixel(Steck, { X - 1, Y - 1, preColor});
+	steck.push_back({ X - 1, Y - 1, preColor });
 	*(pixA + (X - 1) * M + (Y - 1)) = C;
 	do {
-		currentPixel = PopPixel(Steck);
+		currentPixel = steck.back();
+		steck.pop_back();
 		for (int i = -1; i < 2; i += 2) {
 			X = currentPixel.X + i; Y = currentPixel.Y;
 			condition = (X >= 0 && X < M_max && Y >= 0 && Y < N_max && *(pixA + X * M + Y) == preColor);
 			if (condition) {
-				PushPixel(Steck, { X, Y, preColor });
+				steck.push_back({ X, Y, preColor });
 				*(pixA + X * M + Y) = C;
 			}
 			X = currentPixel.X; Y = currentPixel.Y + i;
 			condition = (X >= 0 && X < M_max && Y >= 0 && Y < N_max && *(pixA + X * M + Y) == preColor);
 			if (condition) {
-				PushPixel(Steck, { X, Y, preColor });
+				steck.push_back({ X, Y, preColor });
 				*(pixA + X * M + Y) = C;
 			}
 		}
-	} while (Steck.i != -1);
+	} while (!steck.empty());
 }
