@@ -3,14 +3,14 @@
 #define M_max 250
 #define N_max 250
 using namespace std;
-struct pixel {
+struct pixel { //Пиксели, импользующиеся по отдельности в стеке
 	int X;
 	int Y;
 	char C;
 };
-char pixels[M_max][N_max];
+char pixels[M_max][N_max]; //Сам "экран"
 int M, N;
-///////////////////////////////////////////////////////////
+//-----------------Объявление функций---------------------//
 void I_CleanScr(char* pixA, int M, int N);
 void S_Save(char* pixA, int M, int N);
 void L_SetOixel(char* pixA, int M, int N);
@@ -18,6 +18,7 @@ void H_HorizontalLine(char* pixA, int M, int N);
 void V_VerticalLine(char* pixA, int M, int N);
 void K_FillRectangle(char* pixA, int M, int N);
 void F_FillArea(char* pixA, int M, int N);
+//--------------------------------------------------------//
 int main()
 {
 	char cCurrentKey;
@@ -60,14 +61,14 @@ int main()
 		}
 	}
 }
-void I_CleanScr(char* pixA, int M, int N) {
+void I_CleanScr(char* pixA, int M, int N) { //Очистка экрана
 	for (int i = 0; i < M; i++) {
 		for (int j = 0; j < N; j++) {
 			*(pixA + i * M + j) = 'O';
 		}
 	}
 }
-void S_Save(char* pixels,int M,int N) {
+void S_Save(char* pixels,int M,int N) { //Вывод текущего экрана
 	char letter = ' ';
 	char name[12] = {' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '};
 	int i = 0;
@@ -92,13 +93,13 @@ void S_Save(char* pixels,int M,int N) {
 	}
 	cin >> skipws;
 }
-void L_SetOixel(char* pixA, int M, int N) {
+void L_SetOixel(char* pixA, int M, int N) { //Установка цвета отдельного пикселя
 	char C;
 	int X, Y;
 	cin >> X >> Y >> C;
 	*(pixA + (X - 1) * M + (Y - 1)) = C;
 }
-void H_HorizontalLine(char* pixA, int M, int N) {
+void H_HorizontalLine(char* pixA, int M, int N) { //Горизонтальная линия
 	int X1, X2, Y;
 	char C;
 	cin >> X1 >> X2 >> Y >> C;
@@ -106,7 +107,7 @@ void H_HorizontalLine(char* pixA, int M, int N) {
 		*(pixA + i * M + Y - 1) = C;
 	}
 }
-void V_VerticalLine(char* pixA, int M, int N) {
+void V_VerticalLine(char* pixA, int M, int N) {//Вертикальная линия
 	int X, Y1, Y2;
 	char C;
 	cin >> X >> Y1 >> Y2 >> C;
@@ -114,7 +115,7 @@ void V_VerticalLine(char* pixA, int M, int N) {
 		*(pixA + (X - 1) * M + i) = C;
 	}
 }
-void K_FillRectangle(char* pixA, int M, int N) {
+void K_FillRectangle(char* pixA, int M, int N) {//Закраска прямоугольника
 	int X1, X2, Y1, Y2;
 	char C;
 	cin >> X1 >> X2 >> Y1 >> Y2 >> C;
@@ -124,10 +125,10 @@ void K_FillRectangle(char* pixA, int M, int N) {
 		}
 	}
 }
-void F_FillArea(char* pixA, int M, int N) {
+void F_FillArea(char* pixA, int M, int N) {//Заливка области
 	int X, Y;
 	char C, preColor;
-	vector<pixel> steck;
+	vector<pixel> steck; //Вспомогательный стек
 	pixel currentPixel;
 	int condition;
 	cin >> X >> Y >> C;
