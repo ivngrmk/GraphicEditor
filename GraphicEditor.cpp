@@ -1,5 +1,4 @@
 ﻿#include <iostream>
-#include <vector>
 #define M_max 250
 #define N_max 250
 using namespace std;
@@ -7,6 +6,25 @@ struct pixel { //Пиксели, импользующиеся по отдель�
 	int X;
 	int Y;
 	char C;
+};
+class PixelSteck {
+	int i{ -1 };
+	pixel array[M_max * N_max];
+public:
+	PixelSteck() : i(-1)
+	{ } 
+	void push_back(const pixel& symbol) {
+		array[++i] = symbol;
+	}
+	pixel pop_back() {
+		return array[i--];
+	}
+	bool empty() {
+		if (i == -1) {
+			return true;
+		}
+		else return false;
+	}
 };
 class Screen {
 private:
@@ -103,31 +121,30 @@ public:
 	void F_FillArea() {
 		int X, Y;
 		char C, preColor;
-		vector<pixel> steck; //Вспомогательный стек
+		PixelSteck* steck = new PixelSteck(); //Вспомогательный стек
 		pixel currentPixel;
 		int condition;
 		cin >> X >> Y >> C;
 		preColor = *(*pixels + (X - 1) * M + (Y - 1));
-		steck.push_back({ X - 1, Y - 1, preColor });
+		(*steck).push_back({ X - 1, Y - 1, preColor });
 		*(*pixels + (X - 1) * M + (Y - 1)) = C;
 		do {
-			currentPixel = steck.back();
-			steck.pop_back();
+			currentPixel = (*steck).pop_back();
 			for (int i = -1; i < 2; i += 2) {
 				X = currentPixel.X + i; Y = currentPixel.Y;
 				condition = (X >= 0 && X < M_max && Y >= 0 && Y < N_max && *(*pixels + X * M + Y) == preColor);
 				if (condition) {
-					steck.push_back({ X, Y, preColor });
+					(*steck).push_back({ X, Y, preColor });
 					*(*pixels + X * M + Y) = C;
 				}
 				X = currentPixel.X; Y = currentPixel.Y + i;
 				condition = (X >= 0 && X < M_max && Y >= 0 && Y < N_max && *(*pixels + X * M + Y) == preColor);
 				if (condition) {
-					steck.push_back({ X, Y, preColor });
+					(*steck).push_back({ X, Y, preColor });
 					*(*pixels + X * M + Y) = C;
 				}
 			}
-		} while (!steck.empty());
+		} while (!(*steck).empty());
 	}
 	//--------------------------------------//
 	~Screen() { }
